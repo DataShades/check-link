@@ -1,6 +1,7 @@
 import pytest
 from check_link import Link
 
+
 @pytest.mark.parametrize(
     "link",
     [

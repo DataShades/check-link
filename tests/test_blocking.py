@@ -26,8 +26,6 @@ expected_states = [
 ]
 
 
-
-
 @pytest.mark.parametrize("status,state", expected_states)
 @responses.activate()
 def test_default_head(status, state):

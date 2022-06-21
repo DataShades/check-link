@@ -13,14 +13,6 @@ def rmock():
         yield m
 
 
-
-
-
-
-
-
-
-
 def test_check_all(faker, rmock: aioresponses):
     url1 = faker.url()
     url2 = faker.url()

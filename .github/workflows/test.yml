@@ -1,0 +1,14 @@
+name: Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install
+      run: |
+        pip install -e '.[dev,faster,cli]'
+
+    - name: Run tests
+      run: pytest --cov=check_link

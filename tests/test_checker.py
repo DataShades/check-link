@@ -32,7 +32,6 @@ def rmock():
         yield m
 
 
-
 @pytest.mark.parametrize("status,state", expected_states)
 async def test_default_head(status, state, rmock: aioresponses):
     rmock.head(URL, status=status)
