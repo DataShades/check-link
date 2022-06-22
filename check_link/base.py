@@ -4,7 +4,7 @@ import abc
 import enum
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Mapping, Optional
 from urllib.parse import urlparse
 
 
@@ -16,6 +16,27 @@ class State(enum.Enum):
     protected = enum.auto()
     broken = enum.auto()
     error = enum.auto()
+    exception = enum.auto()
+
+    @classmethod
+    def from_code_and_headers(cls, code: int, headers: Mapping[str, Any]):
+        if code < 300:
+            return cls.available, "Link is available"
+
+        if 300 <= code < 400:
+            location = headers.get("Location") or "unknown"
+            return cls.moved, f"New location is {location}"
+
+        if code in {404, 410}:
+            return cls.missing, "Link is not available"
+
+        if code in {401, 403}:
+            return cls.protected, "Link is not accessible"
+
+        if code < 500:
+            return cls.broken, "Link is invalid"
+
+        return cls.error, "Link is not available"
 
 
 class Option(enum.Flag):
@@ -23,7 +44,7 @@ class Option(enum.Flag):
     try_head = enum.auto()
     add_agent = enum.auto()
 
-    default = try_head | add_agent
+    default = try_head | add_agent | allow_redirects
 
 
 @dataclass
@@ -31,6 +52,9 @@ class Link:
     link: str
     state: State = field(default=State.unknown)
     headers: dict[str, str] = field(default_factory=dict)
+    timeout: int = 30
+    reason: Optional[str] = None
+    code: Optional[int] = None
 
     def __post_init__(self):
         url = urlparse(self.link)
@@ -39,6 +63,17 @@ class Link:
 
     def __str__(self):
         return self.link
+
+    def state_from_code(
+        self, code: int, reason: Optional[str], headers: Mapping[str, Any]
+    ):
+        self.state, self.details = State.from_code_and_headers(code, headers)
+        self.code = code
+        self.reason = reason
+
+    def state_from_exception(self, err: Exception):
+        self.state = State.exception
+        self.details = str(err)
 
 
 @dataclass
@@ -66,25 +101,6 @@ class BaseChecker(abc.ABC):
             )
 
         return headers
-
-    @staticmethod
-    def _state_from_code(code: int):
-        if code < 300:
-            return State.available
-
-        if 300 <= code < 400:
-            return State.moved
-
-        if code == 404:
-            return State.missing
-
-        if code in {401, 403}:
-            return State.protected
-
-        if code < 500:
-            return State.broken
-
-        return State.error
 
     @abc.abstractmethod
     def check(self, link: Link) -> Any:

@@ -18,7 +18,7 @@ expected_states = [
     (400, State.broken),
     (402, State.broken),
     # (405, State.broken),
-    (410, State.broken),
+    (410, State.missing),
     (418, State.broken),
     (500, State.error),
     (501, State.error),

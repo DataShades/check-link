@@ -14,11 +14,11 @@ __all__ = [
     "Link",
     "BlockingChecker",
     "AsyncChecker",
-    "check_all_blocking",
+    "check_all",
 ]
 
 
-def check_all_blocking(
+def check_all(
     links: Iterable[Link], checker_factory: Callable[[], AsyncChecker] = AsyncChecker
 ) -> Iterable[Link]:
     result = asyncio.run(_check_all_async(checker_factory, links))

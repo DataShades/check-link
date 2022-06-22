@@ -3,7 +3,7 @@ from aioresponses import aioresponses
 from check_link import (
     Link,
     State,
-    check_all_blocking,
+    check_all,
 )
 
 
@@ -19,7 +19,7 @@ def test_check_all(faker, rmock: aioresponses):
     rmock.head(url1, status=200)
     rmock.head(url2, status=403)
 
-    result = check_all_blocking(
+    result = check_all(
         [
             Link(url1),
             Link(url2),

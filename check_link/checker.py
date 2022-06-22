@@ -20,14 +20,23 @@ class AsyncChecker(BaseChecker):
     async def _ping(
         self, link: Link, headers: dict[str, str]
     ) -> aiohttp.ClientResponse:
+        allow_redirects = bool(self.options & Option.allow_redirects)
+
         if self.options & Option.try_head:
-            resp = await self.session.head(str(link), headers=headers)
+            resp = await self.session.head(
+                str(link),
+                headers=headers,
+                allow_redirects=allow_redirects,
+                timeout=link.timeout,
+            )
             if resp.status != 405:
                 return resp
 
-        allow_redirects = bool(self.options & Option.allow_redirects)
         return await self.session.get(
-            str(link), allow_redirects=allow_redirects, headers=headers
+            str(link),
+            allow_redirects=allow_redirects,
+            headers=headers,
+            timeout=link.timeout,
         )
 
     async def check(self, link: Link) -> Link:
@@ -37,7 +46,11 @@ class AsyncChecker(BaseChecker):
         headers = self._headers()
         headers.update(link.headers)
 
-        resp = await self._ping(link, headers)
+        try:
+            resp = await self._ping(link, headers)
+        except aiohttp.ClientConnectionError as e:
+            link.state_from_exception(e)
+        else:
+            link.state_from_code(resp.status, resp.reason, resp.headers)
 
-        link.state = self._state_from_code(resp.status)
         return link
