@@ -14,9 +14,8 @@ class State(enum.Enum):
     moved = enum.auto()
     missing = enum.auto()
     protected = enum.auto()
-    broken = enum.auto()
+    invalid = enum.auto()
     error = enum.auto()
-    exception = enum.auto()
 
     @classmethod
     def from_code_and_headers(cls, code: int, headers: Mapping[str, Any]):
@@ -33,10 +32,7 @@ class State(enum.Enum):
         if code in {401, 403}:
             return cls.protected, "Link is not accessible"
 
-        if code < 500:
-            return cls.broken, "Link is invalid"
-
-        return cls.error, "Link is not available"
+        return cls.invalid, "Link is not available"
 
 
 class Option(enum.Flag):
@@ -72,7 +68,7 @@ class Link:
         self.reason = reason
 
     def state_from_exception(self, err: Exception):
-        self.state = State.exception
+        self.state = State.error
         self.details = str(err)
 
 

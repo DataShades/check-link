@@ -15,14 +15,14 @@ expected_states = [
     (404, State.missing),
     (401, State.protected),
     (403, State.protected),
-    (400, State.broken),
-    (402, State.broken),
-    # (405, State.broken),
+    (400, State.invalid),
+    (402, State.invalid),
+    # (405, State.invalid),
     (410, State.missing),
-    (418, State.broken),
-    (500, State.error),
-    (501, State.error),
-    (506, State.error),
+    (418, State.invalid),
+    (500, State.invalid),
+    (501, State.invalid),
+    (506, State.invalid),
 ]
 
 
@@ -42,7 +42,7 @@ async def test_default_head(status, state, rmock: aioresponses):
     assert link.state is state
 
 
-@pytest.mark.parametrize("status,state", expected_states + [(405, State.broken)])
+@pytest.mark.parametrize("status,state", expected_states + [(405, State.invalid)])
 async def test_disabled_head(status, state, rmock: aioresponses):
     rmock.head(URL, status=405)
     rmock.get(URL, status=status)
