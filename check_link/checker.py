@@ -1,4 +1,5 @@
 from __future__ import annotations
+import asyncio
 
 from dataclasses import dataclass, field
 import aiohttp
@@ -6,10 +7,13 @@ from aiohttp.client import ClientSession
 
 from .base import BaseChecker, Link, Option
 
+def session_factory():
+    return ClientSession()
+
 
 @dataclass
 class AsyncChecker(BaseChecker):
-    session: ClientSession = field(default_factory=ClientSession)
+    session: ClientSession = field(default_factory=session_factory)
 
     async def __aenter__(self):
         return self
@@ -23,21 +27,23 @@ class AsyncChecker(BaseChecker):
         allow_redirects = bool(self.options & Option.allow_redirects)
 
         if self.options & Option.try_head:
-            resp = await self.session.head(
+            async with self.session.head(
                 str(link),
                 headers=headers,
                 allow_redirects=allow_redirects,
                 timeout=link.timeout,
-            )
-            if resp.status != 405:
-                return resp
+            ) as resp:
+                if resp.status != 405:
+                    return resp
 
-        return await self.session.get(
+        async with self.session.get(
             str(link),
             allow_redirects=allow_redirects,
             headers=headers,
             timeout=link.timeout,
-        )
+        ) as resp:
+
+            return resp
 
     async def check(self, link: Link) -> Link:
         if self.session.closed:
@@ -50,6 +56,8 @@ class AsyncChecker(BaseChecker):
             resp = await self._ping(link, headers)
         except aiohttp.ClientConnectionError as e:
             link.state_from_exception(e)
+        except asyncio.TimeoutError as e:
+            link.state_from_exception(TimeoutError("Timeout reached"))
         else:
             link.state_from_code(resp.status, resp.reason, resp.headers)
 

@@ -55,3 +55,14 @@ def test_closed_not_raises():
         pass
 
     checker.check(Link(URL))
+
+
+
+# def test_slow():
+#     link = Link("https://www.ellis-brown.com/")
+#     link.timeout = 1
+#     with BlockingChecker() as checker:
+#         checker.check(link)
+
+#     from icecream import ic
+#     ic(link)

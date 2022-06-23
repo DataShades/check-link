@@ -51,6 +51,7 @@ class Link:
     timeout: int = 30
     reason: Optional[str] = None
     code: Optional[int] = None
+    details: str = "Link is not checked yet"
 
     def __post_init__(self):
         url = urlparse(self.link)

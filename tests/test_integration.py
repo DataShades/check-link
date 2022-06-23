@@ -27,3 +27,14 @@ def test_check_all(faker, rmock: aioresponses):
     )
 
     assert [l.state for l in result] == [State.available, State.protected]
+
+
+
+
+# def test_slow():
+#     link = Link("https://www.ellis-brown.com/")
+#     link.timeout = 2
+#     result = check_all([link])
+
+#     from icecream import ic
+#     ic(result)

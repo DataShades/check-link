@@ -60,3 +60,13 @@ async def test_closed_checker():
 
     with pytest.raises(RuntimeError):
         await checker.check(Link(URL))
+
+
+# async def test_slow():
+#     link = Link("https://www.ellis-brown.com/")
+#     link.timeout = 2
+#     async with AsyncChecker() as checker:
+#         await checker.check(link)
+
+#     from icecream import ic
+#     ic(link)
