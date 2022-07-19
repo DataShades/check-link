@@ -2,18 +2,20 @@ from __future__ import annotations
 import asyncio
 
 from dataclasses import dataclass, field
-import aiohttp
-from aiohttp.client import ClientSession
+# import aiohttp
+# from aiohttp.client import ClientSession
+import httpx
+# from httpx import AsyncClient
 
 from .base import BaseChecker, Link, Option
 
 def session_factory():
-    return ClientSession()
-
+    # return ClientSession()
+    return httpx.AsyncClient()
 
 @dataclass
 class AsyncChecker(BaseChecker):
-    session: ClientSession = field(default_factory=session_factory)
+    session: httpx.AsyncClient = field(default_factory=session_factory)
 
     async def __aenter__(self):
         return self
@@ -21,32 +23,35 @@ class AsyncChecker(BaseChecker):
     async def __aexit__(self, type, value, traceback):
         await self.close()
 
+    def close(self):
+
+        return self.session.aclose()
+
+
     async def _ping(
         self, link: Link, headers: dict[str, str]
-    ) -> aiohttp.ClientResponse:
+    ) -> httpx.Response:
         allow_redirects = bool(self.options & Option.allow_redirects)
 
         if self.options & Option.try_head:
-            async with self.session.head(
+            resp = await self.session.head(
                 str(link),
                 headers=headers,
-                allow_redirects=allow_redirects,
+                follow_redirects=allow_redirects,
                 timeout=link.timeout,
-            ) as resp:
-                if resp.status != 405:
+            )
+            if resp.status_code != 405:
                     return resp
 
-        async with self.session.get(
+        return await self.session.get(
             str(link),
-            allow_redirects=allow_redirects,
+            follow_redirects=allow_redirects,
             headers=headers,
             timeout=link.timeout,
-        ) as resp:
-
-            return resp
+        )
 
     async def check(self, link: Link) -> Link:
-        if self.session.closed:
+        if self.session.is_closed:
             raise RuntimeError("Cannot use closed checker")
 
         headers = self._headers()
@@ -54,11 +59,13 @@ class AsyncChecker(BaseChecker):
 
         try:
             resp = await self._ping(link, headers)
-        except aiohttp.ClientConnectionError as e:
+        # except aiohttp.ClientResponseError as e:
+            # link.state_from_code(e.status, e.message, e.headers or {})
+        except httpx.RequestError as e:
             link.state_from_exception(e)
-        except asyncio.TimeoutError as e:
+        except asyncio.TimeoutError:
             link.state_from_exception(TimeoutError("Timeout reached"))
         else:
-            link.state_from_code(resp.status, resp.reason, resp.headers)
+            link.state_from_code(resp.status_code, resp.reason_phrase, resp.headers)
 
         return link

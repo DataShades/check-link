@@ -1,5 +1,6 @@
 import pytest
-from aioresponses import aioresponses
+# from aioresponses import aioresponses
+from pytest_httpx import HTTPXMock
 from check_link import (
     Link,
     State,
@@ -8,16 +9,19 @@ from check_link import (
 
 
 @pytest.fixture
-def rmock():
-    with aioresponses() as m:
-        yield m
+def rmock(httpx_mock):
+    return httpx_mock
+    # with aioresponses() as m:
+    #     yield m
 
 
-def test_check_all(faker, rmock: aioresponses):
+def test_check_all(faker, rmock: HTTPXMock):
     url1 = faker.url()
     url2 = faker.url()
-    rmock.head(url1, status=200)
-    rmock.head(url2, status=403)
+    # rmock.head(url1, status=200)
+    # rmock.head(url2, status=403)
+    rmock.add_response(url=url1, status_code=200, method="HEAD")
+    rmock.add_response(url=url2, status_code=403, method="HEAD")
 
     result = check_all(
         [
