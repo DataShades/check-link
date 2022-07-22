@@ -1,13 +1,16 @@
 from __future__ import annotations
 import asyncio
-
+import logging
 from dataclasses import dataclass, field
+import ssl
 # import aiohttp
 # from aiohttp.client import ClientSession
 import httpx
 # from httpx import AsyncClient
 
 from .base import BaseChecker, Link, Option
+
+log = logging.getLogger(__name__)
 
 def session_factory():
     # return ClientSession()
@@ -61,10 +64,13 @@ class AsyncChecker(BaseChecker):
             resp = await self._ping(link, headers)
         # except aiohttp.ClientResponseError as e:
             # link.state_from_code(e.status, e.message, e.headers or {})
-        except httpx.RequestError as e:
+        except (ssl.SSLError, httpx.RequestError) as e:
             link.state_from_exception(e)
         except asyncio.TimeoutError:
             link.state_from_exception(TimeoutError("Timeout reached"))
+        except Exception as e:
+            log.error("Unhandled request exception for link %s: %s", link, e)
+            raise
         else:
             link.state_from_code(resp.status_code, resp.reason_phrase, resp.headers)
 

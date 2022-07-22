@@ -56,7 +56,7 @@ class Link:
     def __post_init__(self):
         url = urlparse(self.link)
         if not url.scheme or not url.hostname:
-            raise ValueError("Links without schema or hostname are not allowed")
+            raise ValueError(f"Links without schema or hostname are not allowed: {self}")
 
     def __str__(self):
         return self.link
