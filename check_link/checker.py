@@ -60,6 +60,9 @@ class AsyncChecker(BaseChecker):
         headers = self._headers()
         headers.update(link.headers)
 
+        if link.delay:
+            await asyncio.sleep(link.delay)
+
         try:
             resp = await self._ping(link, headers)
         # except aiohttp.ClientResponseError as e:

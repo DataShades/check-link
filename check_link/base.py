@@ -52,6 +52,7 @@ class Link:
     reason: Optional[str] = None
     code: Optional[int] = None
     details: str = "Link is not checked yet"
+    delay: float = 0
 
     def __post_init__(self):
         url = urlparse(self.link)
