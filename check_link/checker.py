@@ -46,12 +46,14 @@ class AsyncChecker(BaseChecker):
             if resp.status_code != 405:
                     return resp
 
-        return await self.session.get(
+        async with self.session.stream(
+            "GET",
             str(link),
             follow_redirects=allow_redirects,
             headers=headers,
             timeout=link.timeout,
-        )
+        ) as resp:
+            return resp
 
     async def check(self, link: Link) -> Link:
         if self.session.is_closed:
