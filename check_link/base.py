@@ -60,6 +60,7 @@ class Link:
     code: Optional[int] = None
     details: str = "Link is not checked yet"
     delay: float = 0
+    exc: Optional[Exception] = None
 
     def __post_init__(self):
         url = urlparse(self.link)
@@ -77,6 +78,8 @@ class Link:
         self.reason = reason
 
     def state_from_exception(self, err: Exception):
+        self.exc = err
+
         if isinstance(err, TimeoutError):
             self.state = State.timeout
         else:
