@@ -15,6 +15,7 @@ class State(enum.Enum):
     missing = enum.auto()
     protected = enum.auto()
     invalid = enum.auto()
+    timeout = enum.auto()
     error = enum.auto()
 
     @classmethod
@@ -26,11 +27,17 @@ class State(enum.Enum):
             location = headers.get("Location") or "unknown"
             return cls.moved, f"New location is {location}"
 
-        if code in {404, 410}:
-            return cls.missing, "Link is not available"
+        if code in {404}:
+            return cls.missing, "Link is missing"
 
-        if code in {401, 403}:
-            return cls.protected, "Link is not accessible"
+        if code in {410}:
+            return cls.missing, "Link is not removed"
+
+        if code in {401}:
+            return cls.protected, "Link requires authentication"
+
+        if code in {403}:
+            return cls.protected, "Not enough permissions to access the link"
 
         return cls.invalid, "Link is not available"
 
@@ -70,7 +77,10 @@ class Link:
         self.reason = reason
 
     def state_from_exception(self, err: Exception):
-        self.state = State.error
+        if isinstance(err, TimeoutError):
+            self.state = State.timeout
+        else:
+            self.state = State.error
         self.details = str(err)
 
 

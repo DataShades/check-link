@@ -69,10 +69,10 @@ class AsyncChecker(BaseChecker):
             resp = await self._ping(link, headers)
         # except aiohttp.ClientResponseError as e:
             # link.state_from_code(e.status, e.message, e.headers or {})
+        except (asyncio.TimeoutError, httpx.TimeoutException):
+            link.state_from_exception(TimeoutError("Timeout reached"))
         except (ssl.SSLError, httpx.RequestError) as e:
             link.state_from_exception(e)
-        except asyncio.TimeoutError:
-            link.state_from_exception(TimeoutError("Timeout reached"))
         except Exception as e:
             log.error("Unhandled request exception for link %s: %s", link, e)
             raise
