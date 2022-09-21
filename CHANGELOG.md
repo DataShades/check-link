@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.10](https://github.com/DataShades/check-link/compare/v0.0.9...v0.0.10) (2022-09-21)
+
+
+### Features
+
+* add timeout state ([54fb659](https://github.com/DataShades/check-link/commit/54fb6592cc791b28ec38785fa4759041dc3e0b62))
+
 ### [0.0.9](https://github.com/DataShades/check-link/compare/v0.0.7...v0.0.9) (2022-08-26)
 
 
