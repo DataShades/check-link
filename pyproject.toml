@@ -1,2 +1,51 @@
+[build-system]
+requires = [ "setuptools",]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "check_link"
+version = "0.0.10.post1"
+description = "Check if URL is available"
+classifiers = [ "Development Status :: 4 - Beta", "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)", "Programming Language :: Python :: 3.7", "Programming Language :: Python :: 3.8", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10",]
+keywords = [ "URL", "validator", "HTTP",]
+requires-python = ">= 3.7"
+dependencies = [ "httpx", "requests",]
+authors = [
+    {name = "DataShades", email = "datashades@linkdigital.com.au"},
+    {name = "Sergey Motornyuk", email = "sergey.motornyuk@linkdigital.com.au"},
+]
+maintainers = [
+    {name = "DataShades", email = "datashades@linkdigital.com.au"},
+]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.license]
+text = "AGPL"
+
+[project.urls]
+Homepage = "https://github.com/DataShades/check-link"
+
+[project.optional-dependencies]
+faster = []
+cli = [ "click",]
+dev = [ "pytest", "pytest-asyncio", "pytest-httpx", "pytest-cov", "aioresponses", "responses", "faker",]
+
+[project.scripts]
+check-link = "check_link.cli:main"
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.pytest.ini_options]
+testpaths = [ "tests",]
+asyncio_mode = "auto"
+
+[tool.setuptools.packages.find]
+exclude = [ "tests",]
+namespaces = false
+
 [tool.black]
 preview = true
